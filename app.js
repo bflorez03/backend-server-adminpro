@@ -7,13 +7,17 @@ var bodyParser = require('body-parser');
 var appRoutes = require('./routes/app');
 var userRoutes = require('./routes/user');
 var loginRoutes = require('./routes/login');
+var hospitalRoutes = require('./routes/hospital');
+// var doctorRoutes = require('./routes/doctor');
 
 // Initialize variables
 var app = express();
 
 // Body-parser
 // Parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(bodyParser.json());
 
 // Database connection
@@ -25,6 +29,8 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (error, res)
 // Routes
 app.use('/user', userRoutes);
 app.use('/login', loginRoutes);
+app.use('/hospital', hospitalRoutes);
+//app.use('/doctor', doctorRoutes);
 app.use('/', appRoutes);
 
 // Listeners

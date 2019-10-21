@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
 
 var Schema = mongoose.Schema;
+
 var validRoles = {
     values: ['ADMIN_ROLE', 'USER_ROLE'],
     message: '{VALUE} is a forbidden role'
