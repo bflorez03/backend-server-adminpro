@@ -1,11 +1,8 @@
 /* Doctor routes */
 
 var express = require('express');
-var Hospital = require('../models/hospital');
-var User = require('../models/user');
 var Doctor = require('../models/doctor');
 var mdAuthentication = require('../middlewares/authentication');
-var SEED = require('../config/config');
 
 var app = express();
 
@@ -13,7 +10,9 @@ var app = express();
 // Get all doctors 
 // ----------------
 app.get('/', (req, res) => {
-    Doctor.find({}, 'name user hospital')
+    Doctor.find({})
+        .populate('hospital')
+        .populate('user', 'name email')
         .exec((err, doctors) => {
             if (err) {
                 return res.status(500).json({

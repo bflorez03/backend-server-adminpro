@@ -13,6 +13,7 @@ var app = express();
 // ----------------
 app.get('/', (req, res) => {
     Hospital.find({}, 'name user')
+        .populate('user', 'name email')
         .exec((err, hospitals) => {
             if (err) {
                 return res.status(500).json({

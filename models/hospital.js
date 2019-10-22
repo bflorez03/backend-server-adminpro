@@ -16,4 +16,4 @@ var hospitalSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('Hospital', hospitalSchema);
+module.exports = mongoose.model('hospital', hospitalSchema);

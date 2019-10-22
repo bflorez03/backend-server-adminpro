@@ -12,14 +12,14 @@ var doctorSchema = new Schema({
     },
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user',
         required: true
     },
     hospital: {
         type: Schema.Types.ObjectId,
-        ref: 'Hospital',
+        ref: 'hospital',
         required: [true, 'Hospital ID is required']
     },
 });
 
-module.exports = mongoose.model('Doctor', doctorSchema);
+module.exports = mongoose.model('doctor', doctorSchema);
