@@ -47,7 +47,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
                 ok: false,
                 message: 'User by id ' + id + ' was not fount',
                 errors: {
-                    message: 'Do not exist user by that ID'
+                    message: 'Do not exist user by ID ' + id
                 }
             });
         }
