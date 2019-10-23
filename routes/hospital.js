@@ -1,10 +1,8 @@
 /* Hospital routes */
 
 var express = require('express');
-var jwt = require('jsonwebtoken');
 var mdAuthentication = require('../middlewares/authentication');
 var Hospital = require('../models/hospital');
-var SEED = require('../config/config').SEED;
 
 var app = express();
 
@@ -12,7 +10,12 @@ var app = express();
 // Get hospital
 // ----------------
 app.get('/', (req, res) => {
+    var from = req.query.from || 0;
+    from = Number(from);
+
     Hospital.find({}, 'name user')
+        .skip(from)
+        .limit(4)
         .populate('user', 'name email')
         .exec((err, hospitals) => {
             if (err) {
@@ -22,15 +25,12 @@ app.get('/', (req, res) => {
                     errors: err
                 });
             }
-            var token = jwt.sign({
-                hospitals: hospitals
-            }, SEED, {
-                expiresIn: 14400
-            });
-            res.status(200).json({
-                ok: true,
-                token: token,
-                Hospitals: hospitals
+            Hospital.count({}, (err, totalHospitals) => {
+                res.status(200).json({
+                    ok: true,
+                    totalHospitals: totalHospitals,
+                    Hospitals: hospitals
+                });
             });
         });
 });

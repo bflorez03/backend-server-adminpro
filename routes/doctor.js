@@ -10,7 +10,12 @@ var app = express();
 // Get all doctors 
 // ----------------
 app.get('/', (req, res) => {
+    var from = req.query.from || 0;
+    from = Number(from);
+
     Doctor.find({})
+        .skip(from)
+        .limit(4)
         .populate('hospital')
         .populate('user', 'name email')
         .exec((err, doctors) => {
@@ -21,10 +26,13 @@ app.get('/', (req, res) => {
                     errors: err
                 });
             }
-            res.status(200).json({
-                ok: true,
-                message: 'All doctors loaded successfully',
-                doctors: doctors
+            Doctor.count({}, (err, totalDoctors) => {
+                res.status(200).json({
+                    ok: true,
+                    totalDoctors: totalDoctors,
+                    message: 'All doctors loaded successfully',
+                    doctors: doctors
+                });
             });
         });
 });

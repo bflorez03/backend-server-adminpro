@@ -11,7 +11,12 @@ var app = express();
 // Get all users 
 // ----------------
 app.get('/', (req, res, next) => {
+    var from = req.query.from || 0;
+    from = Number(from);
+
     User.find({}, 'name surname email img role')
+        .skip(from)
+        .limit(4)
         .exec((err, users) => {
             if (err) {
                 return res.status(500).json({
@@ -20,10 +25,14 @@ app.get('/', (req, res, next) => {
                     errors: err
                 });
             }
-            res.status(200).json({
-                ok: true,
-                Users: users
+            User.count({}, (err, totalUsers) => {
+                res.status(200).json({
+                    ok: true,
+                    totalUsers: totalUsers,
+                    Users: users
+                });
             });
+
         });
 });
 
