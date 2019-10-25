@@ -31,9 +31,7 @@ app.get('/collection/:table/:search', (req, res) => {
             return res.status(400).json({
                 ok: false,
                 message: 'user, doctor or hospital are the only table available for searching',
-                errors: {
-                    message: 'Name of table invalid'
-                }
+                errors: { message: 'Name of table invalid' }
             });
 
     }
@@ -68,9 +66,7 @@ app.get('/all/:search', (req, res, next) => {
 
 function searchHospitals(search, regex) {
     return new Promise((resolve, reject) => {
-        Hospital.find({
-                name: regex
-            })
+        Hospital.find({ name: regex })
             .populate('user', 'name email')
             .exec((err, hospitals) => {
                 if (err) {
@@ -84,9 +80,7 @@ function searchHospitals(search, regex) {
 
 function searchDoctors(search, regex) {
     return new Promise((resolve, reject) => {
-        Doctor.find({
-                name: regex
-            })
+        Doctor.find({ name: regex })
             .populate('user', 'name email')
             .populate('hospital')
             .exec((err, doctors) => {
@@ -102,11 +96,7 @@ function searchDoctors(search, regex) {
 function searchUsers(search, regex) {
     return new Promise((resolve, reject) => {
         User.find({}, 'name surname email role')
-            .or([{
-                'name': regex
-            }, {
-                'email': regex
-            }])
+            .or([{ 'name': regex }, { 'email': regex }])
             .exec((err, users) => {
                 if (err) {
                     reject('Error loading users', err);

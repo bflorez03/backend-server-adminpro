@@ -10,6 +10,8 @@ var loginRoutes = require('./routes/login');
 var hospitalRoutes = require('./routes/hospital');
 var doctorRoutes = require('./routes/doctor');
 var searchRoutes = require('./routes/search');
+var updateRoutes = require('./routes/upload');
+var imageRoutes = require('./routes/image');
 
 // Initialize variables
 var app = express();
@@ -32,7 +34,9 @@ app.use('/user', userRoutes);
 app.use('/login', loginRoutes);
 app.use('/hospital', hospitalRoutes);
 app.use('/doctor', doctorRoutes);
+app.use('/update', updateRoutes);
 app.use('/search', searchRoutes);
+app.use('/image', imageRoutes);
 
 app.use('/', appRoutes);
 
