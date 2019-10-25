@@ -130,7 +130,7 @@ app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
             ok: true,
             message: 'Doctor deleted successfully',
             doctor: deletedDoctor
-        })
+        });
     });
 });
 
