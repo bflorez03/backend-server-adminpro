@@ -4,8 +4,11 @@ var express = require('express');
 var bcrypt = require('bcryptjs');
 var User = require('../models/user');
 var mdAuthentication = require('../middlewares/authentication');
+var Responses = require('../shared/serviceResponses');
 
 var app = express();
+var responses = new Responses();
+
 
 // ----------------
 // Get all users 
@@ -16,14 +19,9 @@ app.get('/', (req, res, next) => {
 
     User.find({}, 'name surname email img role')
         .skip(from)
-        .limit(4)
         .exec((err, users) => {
             if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    message: 'Error loading users from database.',
-                    errors: err
-                });
+                return responses.internalErrorServer(err, res, 'Error loading users from database.');
             }
             User.count({}, (err, totalUsers) => {
                 res.status(200).json({
@@ -45,20 +43,10 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
     // Search for user by id in the DB
     User.findById(id, (err, user) => {
         if (err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error searching the user',
-                errors: err
-            });
+            return responses.internalErrorServer(err, res, 'Error searching the user');
         }
         if (!user) {
-            return res.status(400).json({
-                ok: false,
-                message: 'User by id ' + id + ' was not fount',
-                errors: {
-                    message: 'Do not exist user by ID ' + id
-                }
-            });
+            return responses.badRequestAuth(`User by ID: ${id} was not fount`, res);
         }
         // if user not null and there are not errors, the data can be updated
         user.name = body.name;
@@ -67,16 +55,9 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
         user.role = body.role;
         user.save((err, savedUser) => {
             if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    message: 'Error updating user',
-                    errors: err
-                });
+                return responses.internalErrorServer(err, res, 'Error updating user');
             }
-            res.status(201).json({
-                ok: true,
-                user: savedUser
-            });
+            responses.elementCreated(savedUser, res);
         });
     });
 });
@@ -97,16 +78,9 @@ app.post('/', mdAuthentication.verifyToken, (req, res) => {
 
     user.save((err, savedUser) => {
         if (err) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error creating user',
-                errors: err
-            });
+            return responses.internalErrorServer(err, res, 'Error crating user');
         }
-        res.status(201).json({
-            ok: true,
-            user: savedUser
-        });
+        responses.elementCreated(savedUser, res);
     });
 });
 
@@ -117,26 +91,12 @@ app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
     var id = req.params.id;
     User.findByIdAndRemove(id, (err, deletedUser) => {
         if (err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error deleting user.',
-                errors: err
-            });
+            return responses.internalErrorServer(err, res, 'Error deleting user.');
         }
         if (!deletedUser) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Do not exist user by this ID',
-                errors: {
-                    message: 'Do not exist an user by ID: ' + id
-                }
-            });
+            return responses.badRequestAuth(`Do not exist an user by ID: ${id}`, res);
         }
-        res.status(200).json({
-            ok: true,
-            user: deletedUser
-        });
-
+        responses.elementDeleted(deletedUser, res);
     });
 });
 
