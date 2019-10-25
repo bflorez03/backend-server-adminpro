@@ -9,6 +9,6 @@ Use the command:
 npm install
 ```
 
-## Into Google-SignIn-demo
+## In Google-SignIn-demo
 
 Basic demo code with google authentication available. It could help to test Google Sign in implementation.
