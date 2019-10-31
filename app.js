@@ -16,6 +16,14 @@ var imageRoutes = require('./routes/image');
 // Initialize variables
 var app = express();
 
+// Enable CORS
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+    next();
+});
+
 // Body-parser
 // Parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -25,7 +33,9 @@ app.use(bodyParser.json());
 
 // Database connection
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (error, res) => {
-    if (error) throw error;
+    if (error) {
+        throw error;
+    }
     console.log('Data base: \x1b[32m%s\x1b[0m', 'online');
 });
 

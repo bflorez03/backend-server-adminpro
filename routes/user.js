@@ -5,9 +5,11 @@ var bcrypt = require('bcryptjs');
 var User = require('../models/user');
 var mdAuthentication = require('../middlewares/authentication');
 var Responses = require('../shared/serviceResponses');
+var jwt = require('jsonwebtoken');
+var SEED = require('../config/config').SEED;
 
 var app = express();
-var responses = new Responses();
+var response = new Responses();
 
 
 // ----------------
@@ -17,11 +19,12 @@ app.get('/', (req, res, next) => {
     var from = req.query.from || 0;
     from = Number(from);
 
-    User.find({}, 'name surname email img role')
+    User.find({}, 'name surname email img role google')
         .skip(from)
+        .limit(5)
         .exec((err, users) => {
             if (err) {
-                return responses.internalErrorServer(err, res, 'Error loading users from database.');
+                return response.internalErrorServer(err, res, 'Error loading users from database.');
             }
             User.count({}, (err, totalUsers) => {
                 res.status(200).json({
@@ -43,10 +46,10 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
     // Search for user by id in the DB
     User.findById(id, (err, user) => {
         if (err) {
-            return responses.internalErrorServer(err, res, 'Error searching the user');
+            return response.internalErrorServer(err, res, 'Error searching the user');
         }
         if (!user) {
-            return responses.badRequestAuth(`User by ID: ${id} was not fount`, res);
+            return response.badRequestAuth(`User by ID: ${id} was not fount`, res);
         }
         // if user not null and there are not errors, the data can be updated
         user.name = body.name;
@@ -55,9 +58,10 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
         user.role = body.role;
         user.save((err, savedUser) => {
             if (err) {
-                return responses.internalErrorServer(err, res, 'Error updating user');
+                return response.internalErrorServer(err, res, 'Error updating user');
             }
-            responses.elementCreated(savedUser, res);
+            var token = jwt.sign({ user: savedUser }, SEED, { expiresIn: 14400 }); // 4 hours
+            response.elementSaved(savedUser, res, token);
         });
     });
 });
@@ -65,7 +69,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
 // ----------------
 // Create user
 // ----------------
-app.post('/', mdAuthentication.verifyToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
     var user = new User({
         name: body.name,
@@ -78,9 +82,9 @@ app.post('/', mdAuthentication.verifyToken, (req, res) => {
 
     user.save((err, savedUser) => {
         if (err) {
-            return responses.internalErrorServer(err, res, 'Error crating user');
+            return response.internalErrorServer(err, res, 'Error crating user');
         }
-        responses.elementCreated(savedUser, res);
+        response.elementCreated(savedUser, res);
     });
 });
 
@@ -91,12 +95,12 @@ app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
     var id = req.params.id;
     User.findByIdAndRemove(id, (err, deletedUser) => {
         if (err) {
-            return responses.internalErrorServer(err, res, 'Error deleting user.');
+            return response.internalErrorServer(err, res, 'Error deleting user.');
         }
         if (!deletedUser) {
-            return responses.badRequestAuth(`Do not exist an user by ID: ${id}`, res);
+            return response.badRequestAuth(`Do not exist an user by ID: ${id}`, res);
         }
-        responses.elementDeleted(deletedUser, res);
+        response.elementDeleted(deletedUser, res);
     });
 });
 

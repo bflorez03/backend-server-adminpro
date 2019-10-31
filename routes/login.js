@@ -11,15 +11,15 @@ var app = express();
 var responses = new Responses();
 
 // Google authentication resources
-var CLIENT_ID = require('../config/config').CLIENT_ID;
+var CLIENT_G_ID = require('../config/config').CLIENT_ID;
 const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(CLIENT_ID);
+const client = new OAuth2Client(CLIENT_G_ID);
 
 // Google token verification
 async function verify(token) {
     const ticket = await client.verifyIdToken({
         idToken: token,
-        audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+        audience: CLIENT_G_ID,  // Specify the CLIENT_ID of the app that accesses the backend
     });
     const payload = ticket.getPayload();
 
