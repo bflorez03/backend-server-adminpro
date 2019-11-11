@@ -3,11 +3,13 @@
 var express = require('express');
 var mdAuthentication = require('../middlewares/authentication');
 var Hospital = require('../models/hospital');
+var Responses = require('../shared/serviceResponses');
 
 var app = express();
+var response = new Responses();
 
 // ----------------
-// Get hospital
+// Get hospitals
 // ----------------
 app.get('/', (req, res) => {
     var from = req.query.from || 0;
@@ -15,7 +17,6 @@ app.get('/', (req, res) => {
 
     Hospital.find({}, 'name user')
         .skip(from)
-        .limit(4)
         .populate('user', 'name email')
         .exec((err, hospitals) => {
             if (err) {
@@ -32,6 +33,25 @@ app.get('/', (req, res) => {
                     Hospitals: hospitals
                 });
             });
+        });
+});
+
+// ----------------
+// Get hospital by ID
+// ----------------
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+
+    Hospital.findById(id)
+        .populate('user', 'name img email')
+        .exec((err, hospital) => {
+            if (err) {
+                response.internalErrorServer(err, res, 'Error looking for the hospital');
+            }
+            if (!hospital) {
+                response.badRequestAuth('Not hospital fount', res);
+            }
+            response.elementLoaded(hospital, res);
         });
 });
 

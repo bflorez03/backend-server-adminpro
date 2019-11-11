@@ -13,7 +13,7 @@ class Responses {
     elementSaved(element, res, token) {
         return res.status(200).json({
             ok: true,
-            userSaved: element,
+            elementSaved: element,
             token: token,
             id: element.id
         });
@@ -22,14 +22,21 @@ class Responses {
     elementCreated(element, res) {
         res.status(201).json({
             ok: true,
-            userCreated: element
+            elementCreated: element
+        });
+    }
+
+    elementLoaded(element, res) {
+        res.status(200).json({
+            ok: true,
+            elementLoaded: element
         });
     }
 
     elementDeleted(element, res){
-        res.status(20).json({
+        res.status(200).json({
             ok: true,
-            userDeleted: element
+            elementDeleted: element
         });
     }
 
