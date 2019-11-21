@@ -3,8 +3,10 @@
 var express = require('express');
 var Doctor = require('../models/doctor');
 var mdAuthentication = require('../middlewares/authentication');
+var Responses = require('../shared/serviceResponses');
 
 var app = express();
+var response = new Responses();
 
 // ----------------
 // Get all doctors 
@@ -15,7 +17,7 @@ app.get('/', (req, res) => {
 
     Doctor.find({})
         .skip(from)
-        .limit(4)
+        .limit(5)
         .populate('hospital')
         .populate('user', 'name email')
         .exec((err, doctors) => {
@@ -38,13 +40,32 @@ app.get('/', (req, res) => {
 });
 
 // ----------------
+// Get doctor by ID 
+// ----------------
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+    Doctor.findById(id)
+        .populate('hospital')
+        .populate('user', 'name email img')
+        .exec((err, doctor) => {
+            if (err) {
+                response.internalErrorServer(err, res, 'Error looking for the doctor');
+            }
+            if (!doctor) {
+                response.badRequestAuth('Not doctor found', res);
+            }
+            response.elementLoaded(doctor, res);
+        });
+});
+
+// ----------------
 // Create doctor 
 // ----------------
 app.post('/', mdAuthentication.verifyToken, (req, res) => {
     var body = req.body;
     var doctor = new Doctor({
         name: body.name,
-        user: body.user,
+        user: req.user._id,
         hospital: body.hospital
     });
     doctor.save((err, savedDoctor) => {
@@ -111,7 +132,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
 // ----------------
 app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
     var doctorId = req.params.id;
-    Doctor.findOneAndRemove(doctorId, (err, deletedDoctor) => {
+    Doctor.findByIdAndRemove(doctorId, (err, deletedDoctor) => {
         if (err) {
             return res.status(500).json({
                 ok: false,

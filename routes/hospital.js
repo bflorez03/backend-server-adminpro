@@ -15,8 +15,9 @@ app.get('/', (req, res) => {
     var from = req.query.from || 0;
     from = Number(from);
 
-    Hospital.find({}, 'name user')
+    Hospital.find({}, 'name img user')
         .skip(from)
+        .limit(5)
         .populate('user', 'name email')
         .exec((err, hospitals) => {
             if (err) {
@@ -30,7 +31,7 @@ app.get('/', (req, res) => {
                 res.status(200).json({
                     ok: true,
                     totalHospitals: totalHospitals,
-                    Hospitals: hospitals
+                    hospitals: hospitals
                 });
             });
         });
@@ -49,7 +50,7 @@ app.get('/:id', (req, res) => {
                 response.internalErrorServer(err, res, 'Error looking for the hospital');
             }
             if (!hospital) {
-                response.badRequestAuth('Not hospital fount', res);
+                response.badRequestAuth('Not hospital found', res);
             }
             response.elementLoaded(hospital, res);
         });
@@ -94,7 +95,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
             res.status(201).json({
                 ok: true,
                 message: 'Hospital updated successfully',
-                Hospital: savedHospital
+                hospital: savedHospital
             });
         });
     });
@@ -151,7 +152,7 @@ app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
         res.status(200).json({
             ok: true,
             message: 'Hospital deleted',
-            Hospital: deletedHospital
+            hospitalDeleted: deletedHospital
         });
     });
 });
