@@ -6,6 +6,7 @@ var User = require('../models/user');
 var jwt = require('jsonwebtoken');
 var SEED = require('../config/config').SEED;
 var Responses = require('../shared/serviceResponses');
+var Menu = require('../shared/menu');
 
 var app = express();
 var responses = new Responses();
@@ -49,7 +50,13 @@ app.post('/google', async (req, res) => {
                 return responses.badRequestAuth('An user already exist with this account', res);
             } else {
                 var token = jwt.sign({ user: userFromDB }, SEED, { expiresIn: 14400 }); // 4 hours
-                responses.elementSaved(userFromDB, res, token);
+                return res.status(200).json({
+                    ok: true,
+                    user: userFromDB,
+                    token: token,
+                    id: userFromDB.id,
+                    menu: Menu.getMenu(userFromDB.role)
+                });
             }
         } else {
             // Doesn't exist user, create a new one
@@ -67,7 +74,13 @@ app.post('/google', async (req, res) => {
                     responses.internalErrorServer(err, res, 'Error looking for the user');
                 }
                 var token = jwt.sign({ user: savedUser }, SEED, { expiresIn: 14400 }); // 4 hours
-                responses.elementSaved(savedUser, res, token);
+                return res.status(200).json({
+                    ok: true,
+                    user: savedUser,
+                    token: token,
+                    id: savedUser.id,
+                    menu: Menu.getMenu(savedUser.role)
+                });
             });
         }
     });
@@ -93,7 +106,13 @@ app.post('', (req, res) => {
         // Create token
         userDB.password = ':)';
         var token = jwt.sign({ user: userDB }, SEED, { expiresIn: 14400 }); // 4 hours
-        responses.elementSaved(userDB, res, token);
+        return res.status(200).json({
+            ok: true,
+            user: userDB,
+            token: token,
+            id: userDB.id,
+            menu: Menu.getMenu(userDB.role)
+        });
     });
 });
 

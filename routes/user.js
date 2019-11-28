@@ -7,6 +7,7 @@ var mdAuthentication = require('../middlewares/authentication');
 var Responses = require('../shared/serviceResponses');
 var jwt = require('jsonwebtoken');
 var SEED = require('../config/config').SEED;
+var Menu = require('../shared/menu')
 
 var app = express();
 var response = new Responses();
@@ -40,7 +41,7 @@ app.get('/', (req, res, next) => {
 // ----------------
 // Update user
 // ----------------
-app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
+app.put('/:id', [mdAuthentication.verifyToken, mdAuthentication.verifyAdminRoleOrSameUser], (req, res) => {
     var id = req.params.id;
     var body = req.body;
     // Search for user by id in the DB
@@ -61,7 +62,13 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
                 return response.internalErrorServer(err, res, 'Error updating user');
             }
             var token = jwt.sign({ user: savedUser }, SEED, { expiresIn: 14400 }); // 4 hours
-            response.elementSaved(savedUser, res, token);
+            return res.status(200).json({
+                ok: true,
+                user: savedUser,
+                token: token,
+                id: savedUser.id,
+                menu: Menu.getMenu(savedUser.role)
+            });
         });
     });
 });
@@ -91,7 +98,7 @@ app.post('/', (req, res) => {
 // ----------------
 // Delete user
 // ----------------
-app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
+app.delete('/:id', [mdAuthentication.verifyToken, mdAuthentication.verifyAdminRole], (req, res) => {
     var id = req.params.id;
     User.findByIdAndRemove(id, (err, deletedUser) => {
         if (err) {
