@@ -10,6 +10,7 @@ var Menu = require('../shared/menu');
 
 var app = express();
 var responses = new Responses();
+var mdAuthentication = require('../middlewares/authentication');
 
 // Google authentication resources
 var CLIENT_G_ID = require('../config/config').CLIENT_ID;
@@ -83,6 +84,18 @@ app.post('/google', async (req, res) => {
                 });
             });
         }
+    });
+});
+
+// ------------------------------------------
+// Renew token
+// ------------------------------------------
+app.get('/renewToken', mdAuthentication.verifyToken, (req, res) => {
+    var token = jwt.sign({ user: req.user }, SEED, { expiresIn: 14400 }); // 4 hours
+    return res.status(200).json({
+        ok: true,
+        message: 'New token',
+        token: token
     });
 });
 
